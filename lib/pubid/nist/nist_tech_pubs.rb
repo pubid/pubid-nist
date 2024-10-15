@@ -6,8 +6,6 @@ Lightly.life = "24h"
 
 module Pubid::Nist
   class NistTechPubs
-    URL = "https://raw.githubusercontent.com/usnistgov/NIST-Tech-Pubs/nist-pages/xml/allrecords.xml".freeze
-
     @converted_id = @converted_doi = {}
 
     class << self
@@ -17,9 +15,12 @@ module Pubid::Nist
       def fetch
         Lightly.prune
         @documents ||= Lightly.get "documents" do
-          Nokogiri::XML(URI.open(URL))
-            .xpath("/body/query/doi_record/report-paper/report-paper_metadata")
-            .map { |doc| parse_docid doc }
+          LocMods::Collection.from_xml(OpenURI.open_uri(RelatonNist::DataFetcher::URL)).mods.map do |doc|
+            bib_item = RelatonNist::ModsParser.new(doc, SERIES["long"]).parse
+            bib_item.docidentifier.map do |doc|
+              doc.type == "NIST" ? [:id, doc.id] : [doc.type.downcase.to_sym, doc.id.gsub("10.6028/", "")]
+            end.to_h.merge({ title: bib_item.title.first.title })
+          end
         end
       rescue StandardError => e
         warn e.message

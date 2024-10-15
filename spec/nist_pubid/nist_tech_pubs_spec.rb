@@ -53,7 +53,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
     context "when doi code is wrong" do
       xit "skips merging with doi" do
         expect(described_class.convert(
-                 { id: "NIST TN 1648", doi: "NISTPUB.0413171251" },
+                 { id: "NIST TN 1648", doi: "WRONG.DOI" },
                ).to_s).to eq("NIST TN 1648")
       end
     end
