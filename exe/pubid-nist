@@ -7,13 +7,17 @@ require "csv"
 require "lightly"
 
 def render_report_doc(doc)
-  [doc[:finalPubId] != doc[:id],
+  [doc[:mr] != doc[:doi],
    doc[:finalPubId],
-   doc[:id],
-   doc[:mr] != doc[:doi],
    doc[:mr],
    doc[:doi],
    doc[:title]]
+end
+
+def get_documents(options)
+  documents = Pubid::Nist::NistTechPubs.status
+
+  options[:updated] ? documents.reject { |doc| doc[:doi] == doc[:mr] } : documents
 end
 
 class Pubid::Nist::CLI < Thor
@@ -25,12 +29,11 @@ class Pubid::Nist::CLI < Thor
   option :pull, aliases: "-p", type: :boolean,
                 desc: "Update cache from NIST Tech Pubs database",
                 default: false
+
   def report
     heading = %w(
-      ID\ changed?
-      New\ PubID
-      Document\ ID
       DOI\ changed?
+      New\ PubID
       New\ PubID-MR
       DOI
       Title
@@ -39,18 +42,14 @@ class Pubid::Nist::CLI < Thor
     Lightly.clear "documents" if options[:pull]
     # Pubid::Nist::NistTechPubs.fetch
     if Lightly.cached? "documents"
-      warn "Using nist-tech-pubs.xml file from local cache"
+      warn "Using allrecords-MODS.xml file from local cache"
     else
-      warn "Cached nist-tech-pubs.xml not present, downloading from GitHub..."
+      warn "Cached allrecords-MODS.xml not present, downloading from GitHub..."
     end
 
     puts options[:csv] && heading.to_csv || heading.join(" | ")
 
-    documents = Pubid::Nist::NistTechPubs.status
-
-    documents = documents.reject { |doc| doc[:finalPubId] == doc[:id] } if options[:updated]
-
-    documents.each do |doc|
+    get_documents(options).each do |doc|
       if options[:csv]
         puts render_report_doc(doc).to_csv
       else

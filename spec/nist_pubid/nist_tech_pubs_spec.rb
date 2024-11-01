@@ -1,6 +1,6 @@
 RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
   describe "#fetch" do
-    xit "fetch doc identifiers from nist_tech_pubs" do
+    it "fetch doc identifiers from nist_tech_pubs" do
       expect(described_class.fetch.map { |d| d[:id] })
         .to include("NBS BH 1",
                     "NIST SP 1800-15",
@@ -9,7 +9,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
                     "NIST IR 8379")
     end
 
-    xit "fetches doi identifiers" do
+    it "fetches doi identifiers" do
       expect(described_class.fetch.map { |d| d[:doi] })
         .to include("NBS.BH.1",
                     "NIST.SP.1800-15",
@@ -21,7 +21,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
 
   describe "#convert" do
     it "converts old pubid to new NIST PubID" do
-      expect(described_class.convert({ id: "NISTIR 8379" }).to_s)
+      expect(described_class.convert({ doi: "NISTIR.8379" }).to_s)
         .to eq("NIST IR 8379")
     end
 
@@ -116,8 +116,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
 
     before do
       described_class.documents = [
-        { id: id,
-          doi: doi,
+        { doi: doi,
           title: title },
       ]
     end
@@ -127,8 +126,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
     it do
       expect(subject.to_a)
         .to eq([
-                 { id: id, doi: doi, title: title, mr: mr,
-                   finalPubId: finalPubId },
+                 { doi: doi, title: title, mr: mr, finalPubId: finalPubId },
                ])
     end
 
@@ -139,7 +137,7 @@ RSpec.describe Pubid::Nist::NistTechPubs, vcr: true do
       it do
         expect(subject.to_a)
           .to eq([
-                   { id: id, doi: doi, title: title, finalPubId: "parse error",
+                   { doi: doi, title: title, finalPubId: "parse error",
                      mr: "parse_error" },
                  ])
       end
