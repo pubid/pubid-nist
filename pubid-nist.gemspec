@@ -34,5 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "lightly"
   spec.add_dependency "parslet"
   spec.add_dependency "pubid-core", "~> 1.12.2"
-  spec.add_dependency "rubyzip"
+  spec.add_dependency "rubyzip", "~> 3.7"
 end
